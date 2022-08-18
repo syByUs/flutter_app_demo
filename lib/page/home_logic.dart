@@ -66,34 +66,46 @@ class HomeLogic extends GetxController with PageSearchProtocol {
   void onReady() {
     print("$runtimeType onReady");
     LoadingView.singleton.wrap(asyncFunction: () async {
-      bool ret = await requestData();
-      if (ret) {
+      try {
+        await requestData();
         print("topGrossing len: ${topgrossingDataSource.length}");
         await insertToDB();
+      } catch (e) {
+        await queryTopFree();
+        Toast.showToast("$e");
+      } finally {
+        update(['gross', 'top']);
       }
-      else {
-        var list = await dbLogic.query(tableName: DBConroller.appStoreTableName, offset: 0);
-        for (var p in list) {
-          var content = p['content'];
-          if (content is String) {
-            Map<String, dynamic> map = json.decode(content);
-            topFreeDataSource.add(ApplicationModel.fromJson(map));
-          }
-        }
-      }
-      update(['gross', 'top']);
     });
     super.onReady();
+  }
+
+  queryTopFree() async {
+    var list = await dbLogic.query(tableName: DBConroller.appStoreTableName, offset: 0);
+    for (var p in list) {
+      var content = p['content'];
+      if (content is String) {
+        Map<String, dynamic> map = json.decode(content);
+        topFreeDataSource.add(ApplicationModel.fromJson(map));
+      }
+    }
   }
 
   @override
   void onRefresh() async {
     topFreeDataSource.clear();
     topgrossingDataSource.clear();
-    await requestData();
-    update(['gross', 'top']);
-    refreshController.refreshCompleted();
-    insertToDB();
+    try {
+      await requestData();
+      insertToDB();
+    }
+    catch (e) {
+      await queryTopFree();
+      Toast.showToast("$e");
+    } finally {
+      update(['gross', 'top']);
+      refreshController.refreshCompleted();
+    }
   }
 
   @override
@@ -106,7 +118,7 @@ class HomeLogic extends GetxController with PageSearchProtocol {
         topFreeDataSource.add(ApplicationModel.fromJson(map));
       }
     }
-    update(['gross']);
+    update(['top']);
     refreshController.loadComplete();
   }
 
@@ -140,16 +152,10 @@ class HomeLogic extends GetxController with PageSearchProtocol {
     return listFree;
   }
 
-  Future<bool> requestData() async {
+  Future requestData() async {
     print("requestData");
-    try {
-      await requestTopGrossingData();
-      await requestTopFreeData();
-      return true;
-    } catch (e) {
-      Toast.showToast("$e");
-      return false;
-    }
+    await requestTopGrossingData();
+    await requestTopFreeData();
   }
 
   insertToDB() async {

@@ -4,15 +4,17 @@ import 'package:lpinyin/lpinyin.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
+import '../widgets/toast.dart';
+
 class DBConroller extends GetxController {
-  late Database database;
+  late Future<Database> database;
   static const String dbName = 'appDemo.db';
   static const String appStoreTableName = 'appStore';
 
   @override
   void onInit() async {
     print("$runtimeType onInit");
-    await openDB();
+    await initializationDB();
     super.onInit();
   }
 
@@ -23,12 +25,12 @@ class DBConroller extends GetxController {
     super.onClose();
   }
 
-  Future<bool> openDB() async {
-    print("openDB:...");
+  initializationDB() async {
     try {
+      print("openDB:...");
       String path = (await getApplicationDocumentsDirectory()).path;
       print("openDB: $path");
-      database = await openDatabase(
+      database = openDatabase(
         "$path/$dbName",
         onCreate: (db, version) {
           String sql = "CREATE TABLE $appStoreTableName(id TEXT PRIMARY KEY, name TEXT, namePinyin TEXT, summary TEXT, artist TEXT, content TEXT)";
@@ -36,15 +38,15 @@ class DBConroller extends GetxController {
         },
         version: 1,
       );
-      return true;
     } catch (e) {
       print("$e");
-      return false;
+      Toast.showToast("$e");
     }
   }
 
   Future<void> batchInsert<T extends JsonProtocol>({required String tableName, required List<T> list}) async {
-    var batch = await database.batch();
+    var db = await database;
+    var batch = await db.batch();
     for (var p in list) {
       batch.insert(
         tableName,
@@ -63,12 +65,14 @@ class DBConroller extends GetxController {
       sql = "SELECT * FROM $tableName WHERE namePinyin like '%$q%' OR summary like '%$q%' OR artist like '%$q%';";
     }
     print("sql: $sql");
-    var list = await database.rawQuery(sql);
+    var db = await database;
+    var list = await db.rawQuery(sql);
     return list;
   }
 
   Future<List<Map<String, Object?>>> query({required String tableName, required int offset}) async {
-    var list = await database.query(tableName, limit: 10, offset: offset);
+    var db = await database;
+    var list = await db.query(tableName, limit: 10, offset: offset);
     for (var p in list) {
       print("${p['id']}|${p['name']}");
     }
@@ -76,8 +80,9 @@ class DBConroller extends GetxController {
   }
 
   void _closeDatabase() async {
-    print(database.isOpen);
-    await database.close();
-    print(database.isOpen);
+    var db = await database;
+    print(db.isOpen);
+    await db.close();
+    print(db.isOpen);
   }
 }

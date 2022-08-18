@@ -104,12 +104,12 @@ class HomePage extends StatelessWidget {
           GetBuilder(
             builder: (_) => buildRecommend(),
             init: logic,
-            id: 'top',
+            id: 'gross',
           ),
           GetBuilder(
             builder: (_) => buildTop(),
             init: logic,
-            id: 'gross',
+            id: 'top',
           ),
         ],
       );
@@ -131,7 +131,7 @@ class HomePage extends StatelessWidget {
         padding: EdgeInsets.zero,
         sliver: SliverToBoxAdapter(
           child: Container(
-            height: 170.h,
+            height: logic.topgrossingDataSource.length == 0 ? 0 : 170.h,
             color: Colors.white,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
