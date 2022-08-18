@@ -104,12 +104,12 @@ class HomePage extends StatelessWidget {
           GetBuilder(
             builder: (_) => buildRecommend(),
             init: logic,
-            id: 'gross',
+            id: 'top',
           ),
           GetBuilder(
             builder: (_) => buildTop(),
             init: logic,
-            id: 'top',
+            id: 'gross',
           ),
         ],
       );
@@ -250,7 +250,7 @@ class HomePage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    width: MediaQuery.of(Get.context!).size.width - 120.w,
+                    width: MediaQuery.of(Get.context!).size.width - 125.w,
                     child: Text(
                       "${ele.name.label}",
                       maxLines: 1,

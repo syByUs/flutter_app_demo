@@ -17,8 +17,8 @@ class HomeLogic extends GetxController with PageSearchProtocol {
   var topgrossingDataSource = <ApplicationModel>[];
   var queryDataSource = <ApplicationModel>[];
 
-  static const int PAGESIZE = 10;
-  String topfreeapplicationsURL = "https://itunes.apple.com/hk/rss/topfreeapplications/limit=${PAGESIZE}/json";
+  static const int PAGESIZE = 100;//需求更改，一次性请求100条
+  String topfreeapplicationsURL = "https://itunes.apple.com/hk/rss/topfreeapplications/limit=10/json";
   String topgrossingapplicationsURL = "https://itunes.apple.com/hk/rss/topgrossingapplications/limit=${PAGESIZE}/json";
 
   final TextEditingController searchController = TextEditingController();
@@ -38,7 +38,7 @@ class HomeLogic extends GetxController with PageSearchProtocol {
     searchController.addListener(() {
       String content = searchController.text.trim();
       if (content.length > 0) {
-        sqlQuery(content);
+        sqlFuzzyQuery(content);
       }
     });
     searchFNode.addListener(() {
@@ -66,8 +66,21 @@ class HomeLogic extends GetxController with PageSearchProtocol {
   void onReady() {
     print("$runtimeType onReady");
     LoadingView.singleton.wrap(asyncFunction: () async {
-      await requestData();
-      await insertToDB();
+      bool ret = await requestData();
+      if (ret) {
+        print("topGrossing len: ${topgrossingDataSource.length}");
+        await insertToDB();
+      }
+      else {
+        var list = await dbLogic.query(tableName: DBConroller.appStoreTableName, offset: 0);
+        for (var p in list) {
+          var content = p['content'];
+          if (content is String) {
+            Map<String, dynamic> map = json.decode(content);
+            topFreeDataSource.add(ApplicationModel.fromJson(map));
+          }
+        }
+      }
       update(['gross', 'top']);
     });
     super.onReady();
@@ -85,10 +98,16 @@ class HomeLogic extends GetxController with PageSearchProtocol {
 
   @override
   void onLoadMore() async {
-    var list = await requestTopFreeData();
-    update(['top']);
+    var list = await dbLogic.query(tableName: DBConroller.appStoreTableName, offset: topFreeDataSource.length);
+    for (var p in list) {
+      var content = p['content'];
+      if (content is String) {
+        Map<String, dynamic> map = json.decode(content);
+        topFreeDataSource.add(ApplicationModel.fromJson(map));
+      }
+    }
+    update(['gross']);
     refreshController.loadComplete();
-    insertDataToDB(list);
   }
 
   @override
@@ -96,8 +115,8 @@ class HomeLogic extends GetxController with PageSearchProtocol {
     return true;
   }
 
-  Future sqlQuery(String content) async {
-    var list = await dbLogic.query(tableName: DBConroller.appStoreTableName, q: content);
+  Future sqlFuzzyQuery(String content) async {
+    var list = await dbLogic.fuzzyQuery(tableName: DBConroller.appStoreTableName, q: content);
     queryDataSource.clear();
     for (var p in list) {
       var content = p['content'];
@@ -121,13 +140,15 @@ class HomeLogic extends GetxController with PageSearchProtocol {
     return listFree;
   }
 
-  Future requestData() async {
+  Future<bool> requestData() async {
     print("requestData");
     try {
       await requestTopGrossingData();
       await requestTopFreeData();
+      return true;
     } catch (e) {
       Toast.showToast("$e");
+      return false;
     }
   }
 

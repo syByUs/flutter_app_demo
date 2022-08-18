@@ -55,7 +55,7 @@ class DBConroller extends GetxController {
     await batch.commit();
   }
 
-  Future<List<Map<String, Object?>>> query({required String tableName, required String q}) async {
+  Future<List<Map<String, Object?>>> fuzzyQuery({required String tableName, required String q}) async {
     String sql = '';
     if (ChineseHelper.isChinese(q)) {
       sql = "SELECT * FROM $tableName WHERE name like '%$q%' OR summary like '%$q%' OR artist like '%$q%';";
@@ -64,6 +64,11 @@ class DBConroller extends GetxController {
     }
     print("sql: $sql");
     var list = await database.rawQuery(sql);
+    return list;
+  }
+
+  Future<List<Map<String, Object?>>> query({required String tableName, required int offset}) async {
+    var list = await database.query(tableName, limit: 10, offset: offset);
     for (var p in list) {
       print("${p['id']}|${p['name']}");
     }
