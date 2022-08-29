@@ -8,7 +8,6 @@ part 'label_map_model.g.dart';
 @JsonSerializable()
 class LabelMapModel {
 
-//  @JsonKey(name: '')
   final String? label;
   final Map<String ,dynamic>? attributes;
 

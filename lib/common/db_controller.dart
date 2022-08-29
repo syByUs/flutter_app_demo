@@ -10,6 +10,7 @@ class DBConroller extends GetxController {
   late Future<Database> database;
   static const String dbName = 'appDemo.db';
   static const String appStoreTableName = 'appStore';
+  static const String lookupTableName = 'lookup';
 
   @override
   void onInit() async {
@@ -33,7 +34,10 @@ class DBConroller extends GetxController {
       database = openDatabase(
         "$path/$dbName",
         onCreate: (db, version) {
-          String sql = "CREATE TABLE $appStoreTableName(id TEXT PRIMARY KEY, name TEXT, namePinyin TEXT, summary TEXT, artist TEXT, content TEXT)";
+          String sql = "CREATE TABLE $appStoreTableName(id TEXT PRIMARY KEY, name TEXT, namePinyin TEXT, summary TEXT, artist TEXT, content TEXT);";
+          db.execute(sql);
+
+          sql = "CREATE TABLE $lookupTableName(id TEXT PRIMARY KEY, averageUserRatingForCurrentVersion REAL, userRatingCountForCurrentVersion INTEGER)";
           db.execute(sql);
         },
         version: 1,
@@ -70,12 +74,23 @@ class DBConroller extends GetxController {
     return list;
   }
 
-  Future<List<Map<String, Object?>>> query({required String tableName, required int offset}) async {
+  Future<List<Map<String, Object?>>> query({required String tableName, required int offset, int limit = 10,}) async {
     var db = await database;
-    var list = await db.query(tableName, limit: 10, offset: offset);
+    var list = await db.query(tableName, limit: limit, offset: offset);
     for (var p in list) {
       print("${p['id']}|${p['name']}");
     }
+    return list;
+  }
+
+
+  Future<List<Map<String, Object?>>> queryRatingAndCount(List<String> ids) async {
+    var db = await database;
+    var sql = '''
+      SELECT * FROM $lookupTableName WHERE id in (${ids.map((e) => "\"$e\"").join(",")});
+    ''';
+    print(sql);
+    var list = await db.rawQuery(sql.trim());
     return list;
   }
 

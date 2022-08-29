@@ -25,15 +25,15 @@ ApplicationModel _$ApplicationModelFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$ApplicationModelToJson(ApplicationModel instance) =>
     <String, dynamic>{
-      'im:name': instance.name.toJson(),
-      'im:image': instance.images.map((e) => e.toJson()).toList(),
-      'summary': instance.summary.toJson(),
-      'im:price': instance.price.toJson(),
-      'im:contentType': instance.contentType.toJson(),
-      'rights': instance.rights.toJson(),
-      'title': instance.title.toJson(),
-      'id': instance.id.toJson(),
-      'im:artist': instance.artist.toJson(),
-      'category': instance.category.toJson(),
-      'im:releaseDate': instance.releaseDate.toJson(),
+      'im:name': instance.name,
+      'im:image': instance.images,
+      'summary': instance.summary,
+      'im:price': instance.price,
+      'im:contentType': instance.contentType,
+      'rights': instance.rights,
+      'title': instance.title,
+      'id': instance.id,
+      'im:artist': instance.artist,
+      'category': instance.category,
+      'im:releaseDate': instance.releaseDate,
     };

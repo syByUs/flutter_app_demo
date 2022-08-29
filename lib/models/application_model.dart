@@ -47,3 +47,8 @@ class ApplicationModel {
 
   Map<String, dynamic> toJson() => _$ApplicationModelToJson(this);
 }
+
+
+extension Helper on ApplicationModel {
+  String? get realId => id.attributes?['im:id']?.toString();
+}

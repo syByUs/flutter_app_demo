@@ -52,6 +52,7 @@ class HttpUtil {
         cancelToken: cancelToken,
         onReceiveProgress: onReceiveProgress,
       );
+      print(result.realUri);
       if (result.data == null) {
         throw PlatformException(code: "result error");
       }

@@ -214,84 +214,88 @@ class HomePage extends StatelessWidget {
         ),
       );
 
-  Widget buildVerticalContent(ApplicationModel ele, int index) => Container(
-        height: 80.h,
-        alignment: Alignment.center,
-        margin: EdgeInsets.only(left: 10.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: BorderDirectional(
-            bottom: BorderSide(
-              width: 0.5,
-              color: PageStyle.c_999999_opacity40p,
-            ),
+  Widget buildVerticalContent(ApplicationModel ele, int index) {
+    var count = logic.userRatingCountForCurrentVersion(ele);
+    var rating = logic.averageUserRatingForCurrentVersion(ele);
+    return Container(
+      height: 80.h,
+      alignment: Alignment.center,
+      margin: EdgeInsets.only(left: 10.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: BorderDirectional(
+          bottom: BorderSide(
+            width: 0.5,
+            color: PageStyle.c_999999_opacity40p,
           ),
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-              padding: EdgeInsets.only(right: 10.w),
-              child: Text(
-                "${index + 1}",
-                style: PageStyle.ts_999999_14sp,
-              ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.only(right: 10.w),
+            child: Text(
+              "${index + 1}",
+              style: PageStyle.ts_999999_14sp,
             ),
-            AvatarView(
-              url: ele.images.last.label,
-              size: 60.h,
-              isCircle: index % 2 != 0,
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 8.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    width: MediaQuery.of(Get.context!).size.width - 125.w,
-                    child: Text(
-                      "${ele.name.label}",
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: PageStyle.ts_333333_16sp,
-                    ),
+          ),
+          AvatarView(
+            url: ele.images.last.label,
+            size: 60.h,
+            isCircle: index % 2 != 0,
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 8.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: MediaQuery.of(Get.context!).size.width - 125.w,
+                  child: Text(
+                    "${ele.name.label}",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: PageStyle.ts_333333_16sp,
                   ),
-                  Container(
-                    child: Text(
-                      "${ele.category.attributes?['label']}",
-                      maxLines: 1,
-                      style: PageStyle.ts_999999_13sp,
-                    ),
+                ),
+                Container(
+                  child: Text(
+                    "${ele.category.attributes?['label']}",
+                    maxLines: 1,
+                    style: PageStyle.ts_999999_13sp,
                   ),
-                  Container(
-                    child: Row(
-                      children: [
-                        RatingBarIndicator(
-                          rating: 3.5,
-                          itemCount: 5,
-                          itemSize: 15,
-                          itemPadding: EdgeInsets.symmetric(horizontal: 1.0),
-                          itemBuilder: (context, _) => Icon(
-                            Icons.star,
-                            color: Colors.amber,
-                          ),
+                ),
+                Container(
+                  child: Row(
+                    children: [
+                      RatingBarIndicator(
+                        rating: rating ?? 0,
+                        itemCount: 5,
+                        itemSize: 15,
+                        itemPadding: EdgeInsets.symmetric(horizontal: 1.0),
+                        itemBuilder: (context, _) => Icon(
+                          Icons.star,
+                          color: Colors.amber,
                         ),
-                        Container(
-                          padding: EdgeInsets.only(left: 3.w),
-                          child: Text(
-                            '(1000)',
-                            style: PageStyle.ts_999999_14sp,
-                          ),
-                        )
-                      ],
-                    ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.only(left: 3.w),
+                        child: Text(
+                           "${count ?? 0}",
+                          style: PageStyle.ts_999999_14sp,
+                        ),
+                      )
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
+  }
 }
